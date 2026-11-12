@@ -1,0 +1,65 @@
+name: Publish prepared release
+on:
+  workflow_dispatch:
+    inputs:
+      build_run_id:
+        description: 已成功通过 Windows build 的运行 ID
+        required: true
+      tag:
+        description: 已创建草稿的版本标签，必须与 package.json 一致
+        default: v0.4.0
+        required: true
+permissions:
+  contents: write
+  actions: read
+jobs:
+  publish:
+    runs-on: windows-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      BUILD_RUN_ID: ${{ inputs.build_run_id }}
+      RELEASE_TAG: ${{ inputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Verify build and release
+        shell: pwsh
+        run: |
+          $package = Get-Content package.json -Raw | ConvertFrom-Json
+          if ($env:RELEASE_TAG -ne ('v' + $package.version)) { throw 'Release tag does not match package version' }
+          if ($env:BUILD_RUN_ID -notmatch '^\d+$') { throw 'Build run ID must be numeric' }
+          $run = gh run view $env:BUILD_RUN_ID --json conclusion,headSha,workflowName | ConvertFrom-Json
+          if ($LASTEXITCODE -ne 0 -or $run.conclusion -ne 'success' -or $run.workflowName -ne 'Windows build') { throw 'Select a successful Windows build' }
+          git diff --exit-code $run.headSha HEAD -- electron src public chiikawa package.json package-lock.json index.html tsconfig.json vite.config.ts
+          if ($LASTEXITCODE -ne 0) { throw 'Application source has changed since the selected build' }
+          $release = gh release view $env:RELEASE_TAG --json isDraft | ConvertFrom-Json
+          if ($LASTEXITCODE -ne 0 -or -not $release.isDraft) { throw 'Prepare a draft release before publishing; published releases are not overwritten' }
+      - uses: actions/download-artifact@v4
+        with:
+          name: StudyCompanion-Windows
+          path: release
+          github-token: ${{ github.token }}
+          run-id: ${{ inputs.build_run_id }}
+      - name: Export curated source and checksums
+        shell: pwsh
+        run: |
+          node scripts/export-source.cjs
+          if ($LASTEXITCODE -ne 0) { throw 'Source export failed' }
+          $version = (Get-Content package.json -Raw | ConvertFrom-Json).version
+          $files = @("StudyCompanion-$version-portable.exe", "StudyCompanion-$version-setup.exe", "StudyCompanion-$version-source.zip")
+          $sums = foreach ($name in $files) { ((Get-FileHash -LiteralPath (Join-Path release $name) -Algorithm SHA256).Hash.ToLower() + '  ' + $name) }
+          $sums | Set-Content release/SHA256SUMS.txt -Encoding utf8
+      - name: Upload and publish
+        shell: pwsh
+        run: |
+          $version = (Get-Content package.json -Raw | ConvertFrom-Json).version
+          $files = @("release/StudyCompanion-$version-portable.exe", "release/StudyCompanion-$version-setup.exe", "release/StudyCompanion-$version-source.zip", 'release/SHA256SUMS.txt')
+          gh release upload $env:RELEASE_TAG @files --clobber
+          if ($LASTEXITCODE -ne 0) { throw 'Release upload failed; draft retained' }
+          gh release edit $env:RELEASE_TAG --draft=false --latest
+          if ($LASTEXITCODE -ne 0) { throw 'Release publish failed' }
