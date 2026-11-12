@@ -1,0 +1,11 @@
+# VS Code Pets integration
+
+Upstream: https://github.com/tonybaloney/vscode-pets
+Pinned revision: 15f13bc96cb8bade1aff2d49e363cd332b18536b
+Copyright (c) 2022 Anthony Shaw. MIT License (see LICENSE).
+
+Study Companion adapts the cat's walking/running sequence from src/panel/pets/cat.ts and the horizontal boundary movement from src/panel/states.ts into electron/pet-behavior.mjs. It replaces frame counters with elapsed-time transitions, removes unsupported wall climbing, and adds food, petting, playing and sleep states. Electron window movement uses explicit desktop work-area bounds.
+
+Artwork is Study Companion's original SVG cat, food, hearts and ball. The upstream Catset sprites and other third-party art are NOT included. This notice and the MIT license are included in the built application and accessible from Preferences.
+
+The full shallow clone used for inspection is kept locally at .cache/upstream/vscode-pets (not included in application packages).

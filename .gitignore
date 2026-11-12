@@ -1,0 +1,12 @@
+node_modules/
+dist/
+release/
+.cache/
+data/
+test-results/
+拾光应用/
+*.lnk
+
+study-profile.json
+
+# Personal data and imported theme packs remain excluded.

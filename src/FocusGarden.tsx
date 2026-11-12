@@ -1,0 +1,2 @@
+import {useArtwork} from './ChiiArt';
+export function FocusGarden({page='todos'}:{page?:'todos'|'mentor'|'countdowns'|'settings'}){const {images,custom,theme}=useArtwork();const photo={todos:images.meadow,mentor:images.reflection,countdowns:images.picnic,settings:images.celebration}[page];return <div className={'focus-garden chii-photo-garden photo-'+page} aria-hidden="true"><img src={photo} alt="" draggable="false"/><span>{theme==='chiikawa'?'ちいかわ · 一起过小小的每一天':custom?'你的风景 · 陪伴每一天':'拾光原野 · 一起过小小的每一天'}</span></div>;}

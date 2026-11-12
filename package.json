@@ -1,0 +1,94 @@
+{
+  "name": "study-companion",
+  "version": "0.4.0",
+  "description": "拾光 · Chiikawa 日常清单、收获积累与桌面陪伴",
+  "author": "Study Companion",
+  "private": true,
+  "main": "electron/main.cjs",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "tsc --noEmit && vite build",
+    "test": "node --test tests/*.test.cjs",
+    "start": "electron .",
+    "package": "npm run build && electron-builder --win dir --publish never",
+    "test:desktop": "node tests/desktop.cjs",
+    "package:release": "npm run build && electron-builder --win portable nsis --publish never",
+    "source:export": "node scripts/export-source.cjs",
+    "source:verify": "node scripts/export-source.cjs --verify",
+    "branding": "node scripts/render-branding.cjs",
+    "pretest": "node scripts/prepare-test.cjs"
+  },
+  "dependencies": {
+    "lucide-react": "^0.468.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "electron": "^44.3.0",
+    "electron-builder": "^26.0.0",
+    "playwright": "^1.58.0",
+    "typescript": "^5.7.0",
+    "vite": "^6.0.0"
+  },
+  "build": {
+    "appId": "local.study.companion",
+    "productName": "StudyCompanion",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "electron/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        "dir"
+      ],
+      "signAndEditExecutable": true,
+      "icon": "public/branding/shiguang.ico",
+      "signExecutable": false
+    },
+    "extraResources": [
+      {
+        "from": "public/branding",
+        "to": "branding",
+        "filter": [
+          "pet.svg",
+          "pet.png",
+          "pet.ico",
+          "chiikawa-icon.svg",
+          "shiguang.png",
+          "shiguang.ico"
+        ]
+      }
+    ],
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "artifactName": "StudyCompanion-${version}-setup.${ext}",
+      "include": "scripts/nsis/installer.nsh",
+      "shortcutName": "拾光"
+    },
+    "portable": {
+      "artifactName": "StudyCompanion-${version}-portable.${ext}"
+    }
+  },
+  "license": "MIT",
+  "overrides": {
+    "minimatch@>=7.0.0 <11.0.1": "11.0.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/TXYhusband/shiguang.git"
+  },
+  "homepage": "https://github.com/TXYhusband/shiguang#readme",
+  "bugs": {
+    "url": "https://github.com/TXYhusband/shiguang/issues"
+  }
+}

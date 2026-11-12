@@ -1,0 +1,6 @@
+const {test}=require('node:test');const assert=require('node:assert/strict');
+const {createState,dispatch,recover}=require('../electron/engine.cjs');
+const {mentorStatus,collectMentorReminder}=require('../electron/mentor.cjs');
+const at=d=>new Date(d+'T12:00:00').getTime();
+test('all five daily items can complete independently without timing; tomorrow resets',()=>{let s=createState(at('2026-11-04'));for(const id of ['words','papers','leetcode','fullstack','project'])s=dispatch(s,{type:'checkin',id,completed:true},at('2026-11-04'));assert.equal(Object.values(s.checkins['2026-11-04']).filter(Boolean).length,5);assert.equal(s.active,null);assert.deepEqual(s.days,{});s=dispatch(s,{type:'checkin',id:'words',completed:false,date:'2026-11-04'},at('2026-11-05'));assert.equal(s.checkins['2026-11-04'].words,false);assert.deepEqual(s.checkins['2026-11-05']||{},{});});
+test('legacy reminders become silent and report day count never turns urgent',()=>{let s=createState(at('2026-10-01'));s.mentor.reminder=true;s=dispatch(s,{type:'mentor-report',date:'2026-10-02'},at('2026-11-04'));s=recover(s,at('2026-11-04'));assert.equal(s.mentor.reminder,false);assert.equal(mentorStatus(s.mentor,'2026-11-04').elapsed,33);assert.equal(mentorStatus(s.mentor,'2026-11-04').level,'calm');assert.equal(collectMentorReminder({...s.mentor,reminder:true},'2026-11-04'),null);});

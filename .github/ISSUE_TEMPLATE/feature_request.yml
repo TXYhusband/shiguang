@@ -1,0 +1,15 @@
+name: 提个想法
+description: 希望拾光帮你做什么？
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: 使用场景
+      description: 你在什么情况下遇到了什么麻烦？
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: 你希望怎么改善？
+      description: 有大概想法即可，也可以描述你喜欢的交互方式。

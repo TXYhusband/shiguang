@@ -1,0 +1,22 @@
+name: 反馈问题
+description: 告诉我们哪里没有按预期工作
+body:
+  - type: input
+    id: version
+    attributes:
+      label: 拾光版本与 Windows 版本
+      placeholder: 例如：拾光 0.4.0，Windows 11
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: 如何出现这个问题？
+      description: 写下操作步骤、实际结果和预期结果。
+    validations:
+      required: true
+  - type: textarea
+    id: attachment
+    attributes:
+      label: 截图或补充信息
+      description: 请遮掉个人内容，不要上传数据库、备份或本机配置文件。
